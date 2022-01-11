@@ -1,0 +1,45 @@
+//Реализуем логику подключения к базе, а также хранение имен таблиц в константах
+package repository
+
+import (
+	"fmt"
+
+	"github.com/jmoiron/sqlx"
+)
+
+//Опишем константы c названием таблиц нашей базы
+const (
+	userTable       = "users"
+	todoListsTable  = "todo_lists"
+	usersListsTable = "users_lists"
+	todoItemTable   = "todo_items"
+	listsItemsTable = "lists_items"
+)
+
+//Для подключения к базе данных необходимо 6 параметров:
+type Config struct {
+	Host     string
+	Port     string
+	Username string
+	Password string
+	DBName   string
+	SSLMode  string
+}
+
+func NewPostgresDB(cfg Config) (*sqlx.DB, error) {
+	//Первый аргумент- название движка, второй- строка с параметрами подключения)
+	db, err := sqlx.Connect("postgres", fmt.Sprintf("host =%s port=%s user=%s dbname=%s password=%s sslmode=%s", cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode))
+	if err != nil {
+		return nil, err
+	}
+	//Проверим подключение с помощью функции Ping
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
+
+
