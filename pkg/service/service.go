@@ -11,8 +11,10 @@ import (
 type Authorization interface {
 	//Принимает структуру User и возвращает id созданного в базе пользователя
 	CreateUser(user todo.User) (int, error)
-	//Принимаем лгин и пароль, а возвращаем- токен и ошибку
+	//Принимаем логин и пароль, а возвращаем- токен и ошибку
 	GenerateToken(username, password string) (string, error)
+	//Метод длЯ парсинга токена:принимает токен, возвращает id пользователя при успешном парсинге
+	ParseToken(token string) (int, error) //-> Переходим в auth.go и имплементируем эту логику
 }
 
 type TodoList interface {

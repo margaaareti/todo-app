@@ -17,7 +17,7 @@ func NewAuthPostqres(db *sqlx.DB) *AuthPostgres {
 	return &AuthPostgres{db: db}
 }
 
-//Пишем запрос
+//Создаем пользователя и вносим в бд
 func (r *AuthPostgres) CreateUser(user todo.User) (int, error) {
 	var id int
 	query := fmt.Sprintf("INSERT INTO %s (name,username,password_hash) values($1,$2,$3) RETURNING id", userTable)
