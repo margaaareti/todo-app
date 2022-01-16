@@ -16,6 +16,9 @@ type Authorization interface {
 }
 
 type TodoList interface {
+	Create(userdId int, list todo.TodoList) (int, error) //->Создаем файл работы со списками todo_list_postgress.go
+	GetAll(userdId int) ([]todo.TodoList, error)
+	GetById(userId, listId int) (todo.TodoList, error)
 }
 
 type TodoItem interface {
@@ -33,5 +36,6 @@ type Repository struct {
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		Authorization: NewAuthPostqres(db),
+		TodoList:      NewTodoListPostgres(db), //-> также в сервисе
 	}
 }

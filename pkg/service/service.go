@@ -18,6 +18,13 @@ type Authorization interface {
 }
 
 type TodoList interface {
+	//для создания списков принимаем id пользователя и структуру списка
+	//возвращаем id и ошибку
+	Create(userId int, list todo.TodoList) (int, error) //->Создаем файл todo.go, где реализуем все методы todo
+	//Для получения всех списков принимаем id пользователя и возвращаем слайс со списками
+	GetAll(userId int) ([]todo.TodoList, error)
+	//Для получения списка по id нам нужно id самого списка и id пользователя
+	GetById(userId, listId int) (todo.TodoList, error)
 }
 
 type TodoItem interface {
@@ -35,5 +42,6 @@ type Service struct {
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
+		TodoList:      NewTodoListService(repos.TodoList), //->Переходим в обработчик list.go и вызовем метод создаю списков
 	}
 }
