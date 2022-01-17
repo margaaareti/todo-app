@@ -25,6 +25,10 @@ type TodoList interface {
 	GetAll(userId int) ([]todo.TodoList, error)
 	//Для получения списка по id нам нужно id самого списка и id пользователя
 	GetById(userId, listId int) (todo.TodoList, error)
+	//Для удаления нужно получать id списка и юзера
+	Delete(userId, listId int) error
+	//id юзера, списка, и форму
+	Update(userId int, id int, input todo.UpdateListInput) error
 }
 
 type TodoItem interface {

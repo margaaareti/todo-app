@@ -27,3 +27,16 @@ func (s *TodoListService) GetAll(userdId int) ([]todo.TodoList, error) {
 func (s *TodoListService) GetById(userId, listId int) (todo.TodoList, error) {
 	return s.repo.GetById(userId, listId) //-> переходим в репозиторий и создаем метод GetById
 }
+
+func (s *TodoListService) Delete(userId, listId int) error {
+	return s.repo.Delete(userId, listId) //-> переходим в репозиторий и создаем метод Delete
+}
+
+func (s *TodoListService) Update(userId, listId int, input todo.UpdateListInput) error {
+	if err := input.Validate(); err != nil {
+		return err
+	} //-> добавим в обработчик ответ с аналогичным статусом
+
+	return s.repo.Update(userId, listId, input) //-> переходим в репозиторий и создаем метод Update
+
+}

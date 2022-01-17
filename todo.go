@@ -1,5 +1,7 @@
 package todo
 
+import "errors"
+
 //Добавляем теги db для того,чтобы делать выборку из базы
 type TodoList struct {
 	Id          int    `json:"id" db:"id"`
@@ -24,4 +26,17 @@ type ListenItem struct {
 	Id     int
 	UserId int
 	ListId int
+}
+
+//Структура для изменения списков
+type UpdateListInput struct {
+	Title       *string `json:"title"`
+	Description *string `json:"description"` //->вернемся к list.go
+}
+
+func (i UpdateListInput) Validate() error {
+	if i.Title == nil && i.Description == nil {
+		return errors.New("update structure has no values")
+	}
+	return nil
 }

@@ -10,7 +10,7 @@ import (
 )
 
 //Регистрация
-func (h *Handler) sighUp(c *gin.Context) {
+func (h *Handler) signUp(c *gin.Context) {
 	//Структура, куда будут записываться данные из json от пользователей
 	var input todo.User
 
@@ -43,7 +43,7 @@ type signInInput struct {
 	Password string `json:"password" `
 }
 
-func (h *Handler) sighIn(c *gin.Context) {
+func (h *Handler) signIn(c *gin.Context) {
 
 	//Структура, куда будут записываться данные из json от пользователей
 	var input signInInput

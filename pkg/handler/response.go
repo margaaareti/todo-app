@@ -6,7 +6,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Error struct {
+//Структура для ответа на успешное удаление листа
+type statusResponse struct {
+	Status string `json:"status" `
+}
+
+type errorResponse struct {
 	Message string `json:"message"`
 }
 
