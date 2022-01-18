@@ -32,6 +32,8 @@ type TodoList interface {
 }
 
 type TodoItem interface {
+	CreateItem(userId, listId int, input todo.TodoItem) (int, error)
+	GetAllItems(userId, listId int) ([]todo.TodoItem, error)
 }
 
 //Создаем структуру-сервис, собирающую все наши сервисы в одном месте
