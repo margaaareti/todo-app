@@ -2,6 +2,8 @@ package repository
 
 import (
 	"fmt"
+	"log"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/zhashkevych/todo-app"
@@ -46,11 +48,77 @@ func (r TodoItemPostgres) CreateItem(listId int, item todo.TodoItem) (int, error
 //2.Получаем все айтемы из таблицы
 func (r TodoItemPostgres) GetAllItems(userId, listId int) ([]todo.TodoItem, error) {
 	var items []todo.TodoItem
-	query := fmt.Sprintf("SELECT * FROM %s ti INNER JOIN %s li on li.item_id = ti.id INNER JOIN %s ul on ul.list_id = li.list_id WHERE li.list_id= $1 AND ul.user_id =$2", todoItemsTable, listsItemsTable, usersListsTable)
+	query := fmt.Sprintf("SELECT ti.id, ti.title, ti.description, ti.done FROM %s ti INNER JOIN %s li on li.item_id = ti.id INNER JOIN %s ul on ul.list_id = li.list_id WHERE li.list_id= $1 AND ul.user_id =$2", todoItemsTable, listsItemsTable, usersListsTable)
 	//Select- для записи результатов в слайс-структуру
 	if err := r.db.Select(&items, query, listId, userId); err != nil {
 		return nil, err
 	}
 
 	return items, nil
+}
+
+//3.Получаем айтемы по айди
+func (r TodoItemPostgres) GetItemById(userId, itemId int) (todo.TodoItem, error) {
+	var item todo.TodoItem
+	query := fmt.Sprintf(`SELECT ti.id, ti.title, ti.description, ti.done FROM %s ti INNER JOIN %s li on li.item_id = ti.id INNER JOIN %s ul on ul.list_id = li.list_id
+	 WHERE ti.id= $1 AND ul.user_id =$2`, todoItemsTable, listsItemsTable, usersListsTable)
+
+	if err := r.db.Get(&item, query, itemId, userId); err != nil {
+		return item, err
+	}
+
+	return item, nil
+}
+
+func (r TodoItemPostgres) DeleteItem(userId, itemId int) error {
+	query := fmt.Sprintf(`DELETE FROM %s ti USING %s li, %s ul WHERE ti.id = li.item_id AND li.list_id = ul.list_id AND ul.user_id =$1 AND ti.id = $2`,
+		todoItemsTable, listsItemsTable, usersListsTable)
+
+	_, err := r.db.Exec(query, userId, itemId)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return nil
+}
+
+func (r TodoItemPostgres) UpdateItem(userId, itemId int, input todo.UpdateItemInput) error {
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	argId := 1
+
+	//Выполняем проверку полей:если они не nil- добавляем в наши слайсы элементы для
+	//формирования запросов в базу с их обновлением
+	if input.Title != nil {
+		//Присвоение полю Title  и значение для плейсхолдера
+		setValues = append(setValues, fmt.Sprintf("title=$%d", argId))
+		args = append(args, *input.Title)
+		argId++
+	}
+
+	if input.Description != nil {
+		//Присвоение полю Description и значение для плейсхолдера
+		setValues = append(setValues, fmt.Sprintf("description=$%d", argId))
+		args = append(args, *input.Description)
+		argId++
+	}
+
+	if input.Done != nil {
+		//Присвоение полю Done  и значение для плейсхолдера
+		setValues = append(setValues, fmt.Sprintf("done=$%d", argId))
+		args = append(args, *input.Done)
+		argId++
+	}
+
+	//объявим перем.,в кот. соед. элементы слайса строк в одну строку
+	setQuery := strings.Join(setValues, ", ")
+
+	query := fmt.Sprintf(`UPDATE %s ti SET %s FROM %s li, %s ul WHERE ti.id = li.item_id AND li.list_id = ul.list_id AND ul.user_id =$%d AND ti.id =$%d`,
+		todoListsTable, setQuery, listsItemsTable, usersListsTable, argId, argId+1)
+
+	//Добавим еще 2 элемента в слайс аргументов: id пользователя и списков
+	args = append(args, userId, itemId)
+
+	//Выполним запрос, в кот. передадим запрос и список аргументов
+	_, err := r.db.Exec(query, args...)
+	return err
 }

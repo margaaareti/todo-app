@@ -34,6 +34,9 @@ type TodoList interface {
 type TodoItem interface {
 	CreateItem(userId, listId int, input todo.TodoItem) (int, error)
 	GetAllItems(userId, listId int) ([]todo.TodoItem, error)
+	GetItemById(userId, itemId int) (todo.TodoItem, error)
+	DeleteItem(userId, itemId int) error
+	UpdateItem(userId, itemId int, input todo.UpdateItemInput) error
 }
 
 //Создаем структуру-сервис, собирающую все наши сервисы в одном месте
@@ -49,5 +52,6 @@ func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
 		TodoList:      NewTodoListService(repos.TodoList), //->Переходим в обработчик list.go и вызовем метод создаю списков
+		TodoItem:      NewToDoItemService(repos.TodoItem, repos.TodoList),
 	}
 }

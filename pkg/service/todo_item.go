@@ -29,3 +29,22 @@ func (s *ToDoItemService) CreateItem(userId, listId int, item todo.TodoItem) (in
 func (s *ToDoItemService) GetAllItems(userId, listId int) ([]todo.TodoItem, error) {
 	return s.repo.GetAllItems(userId, listId)
 }
+
+//3.Получаем по id
+func (s *ToDoItemService) GetItemById(userId, itemId int) (todo.TodoItem, error) {
+	return s.repo.GetItemById(userId, itemId)
+}
+
+//4.Удаляем
+func (s *ToDoItemService) DeleteItem(userId, itemId int) error {
+	return s.repo.DeleteItem(userId, itemId)
+}
+
+//5.Изменяем
+func (s *ToDoItemService) UpdateItem(userId, itemId int, input todo.UpdateItemInput) error {
+	if err := input.Validate(); err != nil {
+		return err
+	}
+	return s.repo.UpdateItem(userId, itemId, input)
+
+}
