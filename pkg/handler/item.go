@@ -111,6 +111,7 @@ func (h *Handler) deleteItem(c *gin.Context) {
 
 }
 
+//5.Редактирование
 func (h *Handler) updateItem(c *gin.Context) {
 	userId, err := getUserId(c) //Функция определена в middleware.go
 	if err != nil {
@@ -126,14 +127,14 @@ func (h *Handler) updateItem(c *gin.Context) {
 
 	var input todo.UpdateItemInput
 	if err := c.BindJSON(&input); err != nil {
-		newErrorResponse(c, http.StatusBadRequest, "invalid id param22222222222222")
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	if err := h.services.TodoItem.UpdateItem(userId, id, input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 	}
 	c.JSON(http.StatusOK, statusResponse{
-		Status: "Ok",
+		"Ok",
 	})
 
 }

@@ -81,6 +81,7 @@ func (r TodoItemPostgres) DeleteItem(userId, itemId int) error {
 	return nil
 }
 
+//Удаляем айтемы
 func (r TodoItemPostgres) UpdateItem(userId, itemId int, input todo.UpdateItemInput) error {
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
@@ -113,7 +114,7 @@ func (r TodoItemPostgres) UpdateItem(userId, itemId int, input todo.UpdateItemIn
 	setQuery := strings.Join(setValues, ", ")
 
 	query := fmt.Sprintf(`UPDATE %s ti SET %s FROM %s li, %s ul WHERE ti.id = li.item_id AND li.list_id = ul.list_id AND ul.user_id =$%d AND ti.id =$%d`,
-		todoListsTable, setQuery, listsItemsTable, usersListsTable, argId, argId+1)
+		todoItemsTable, setQuery, listsItemsTable, usersListsTable, argId, argId+1)
 
 	//Добавим еще 2 элемента в слайс аргументов: id пользователя и списков
 	args = append(args, userId, itemId)

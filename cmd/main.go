@@ -1,7 +1,10 @@
 package main
 
 import (
+	"context"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -48,11 +51,36 @@ func main() {
 
 	//Инициализируем экземпляр сервера
 	srv := new(todo.Server)
-	//Запуск сервера вызовом метода Run
-	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
-		logrus.Fatalf("error occured while running http server: %s", err.Error())
+	//Прилож.созд. отд. горутины под каждый запрос(делает запросы к БД и выолняет транзакции)
+	// при выходе из прилож. мы останавливаем прием всех запросов, но законч. обраб.всех текущ. запросов и операц. в БД
+	//для этого запускаем сервер в горутине
+	go func() {
+		//Запуск сервера вызовом метода Run
+		if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+			logrus.Fatalf("error occured while running http server: %s", err.Error())
+		}
+	}()
+
+	logrus.Print("TodoApp started")
+
+	//Добавляем блокировку функции main
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	//Строка чтения из канала, блокирующая главную горутину main
+	<-quit
+
+	//Сообщ. о том, что прилож. заканч. выполнение
+	logrus.Print("TodoApp Shutting Down")
+
+	//и вызовем 2 метода: остановки сервера
+	if err := srv.Shutdown(context.Background()); err != nil {
+		logrus.Errorf("error occured on server shutting down: %s", err.Error())
 	}
 
+	//и закрытия всех соединений с БД,что гарант. о завершении всех операция перед выходом из приложения
+	if err := db.Close(); err != nil {
+		logrus.Errorf("error occured on db connection close: db")
+	}
 }
 
 //Функция для инициализации конфигурационных данных
